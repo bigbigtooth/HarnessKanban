@@ -74,8 +74,8 @@ onMounted(() => {
           </svg>
         </span>
         <span class="brand-copy">
-          <span class="brand-name">Harness<em>Kanban</em></span>
-          <span class="brand-sub">Harness看板</span>
+          <span class="brand-name">Harness<em>看板</em></span>
+          <span class="brand-sub">HarnessKanban</span>
         </span>
       </div>
 
