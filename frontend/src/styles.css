@@ -1,0 +1,20 @@
+/**
+ * 全局样式入口，顺序即优先级（后加载的赢）：
+ *
+ * 1. `tokens/base/components` —— 旧设计系统的令牌与二级页面（全局看板 / Agent / 活动）仍在用的类；
+ * 2. `demo` —— 首页（任务 / 项目）与浮窗的 demo 外观：未加前缀是浅色，`html[data-theme="dark"]` 是深色；
+ * 3. `app` —— 本应用补充的样式（五列看板、设置浮窗、任务详情、旧版令牌对齐 demo 配色）。
+ */
+@import './styles/tokens.css';
+@import './styles/base.css';
+@import './styles/components.css';
+@import './styles/demo.css';
+@import './styles/app.css';
+
+/* 应用挂载点：demo 的页面骨架要求一个纵向 flex 容器撑满视口。 */
+#app {
+  height: auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}

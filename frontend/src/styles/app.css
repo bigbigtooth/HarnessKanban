@@ -1,0 +1,879 @@
+/* =========================================================
+   Harness看板 应用层补充样式（demo 提取层之后加载）
+
+   只写 demo 没有的东西：
+   1. 五列看板与新增的卡片/列表元信息；
+   2. 顶栏右上角的半透明设置按钮与「更多」菜单；
+   3. 设置浮窗（环境变量 / LLM）；
+   4. 任务详情浮窗的两列表格与时间线；
+   5. 二级页面（全局看板 / Agent / 活动）的深色可读性。
+   ========================================================= */
+
+/* ---------- 1. 五列看板 ---------- */
+.board {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+:root {
+  --col-preparing-soft: #eef2f4;
+  --col-preparing-line: #ccd8de;
+  --col-todo-soft: #dff7ec;
+  --col-todo-line: #a9e7d1;
+  --col-doing-soft: #e2f2ff;
+  --col-doing-line: #aedcff;
+  --col-review-soft: #f1eaff;
+  --col-review-line: #d0bbff;
+  --col-done-soft: #fff4d6;
+  --col-done-line: #ffe29a;
+}
+
+html[data-theme="dark"] {
+  --col-preparing-soft: rgba(255, 255, 255, .07);
+  --col-preparing-line: rgba(255, 255, 255, .32);
+  --col-todo-soft: rgba(216, 255, 102, .12);
+  --col-todo-line: #d8ff66;
+  --col-doing-soft: rgba(121, 229, 255, .12);
+  --col-doing-line: #79e5ff;
+  --col-review-soft: rgba(177, 140, 255, .14);
+  --col-review-line: #b18cff;
+  --col-done-soft: rgba(255, 138, 216, .12);
+  --col-done-line: #ff8ad8;
+}
+
+.task-number {
+  display: inline-block;
+  margin-right: 4px;
+  color: #a8b8b4;
+  font-family: var(--mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+html[data-theme="dark"] .task-number { color: #8c80ad; }
+
+.card-owner--empty {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--line-strong);
+  font-size: 11px;
+  opacity: .7;
+}
+
+/* 卡片左下角的元信息在五列宽度下允许换行 */
+.card-meta { row-gap: 4px; }
+
+/* 看板加载 / 出错时的占位块 */
+.board-state {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 54px 24px;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .5);
+  color: var(--muted);
+  text-align: center;
+}
+.board-state strong { font-family: var(--display); font-size: 15px; color: var(--ink-soft); }
+.board-state .state-face { font-size: 32px; }
+.board-state.is-error { border-color: #ffd0d8; background: #fff6f7; }
+.board-state .btn { margin-top: 8px; }
+
+html[data-theme="dark"] .board-state {
+  background: rgba(255, 255, 255, .03);
+  border-color: rgba(255, 255, 255, .12);
+}
+html[data-theme="dark"] .board-state.is-error { background: rgba(255, 130, 150, .08); border-color: rgba(255, 130, 150, .3); }
+
+/* 紧凑型筛选下拉（看板工具条里） */
+.select-compact {
+  width: auto;
+  min-width: 118px;
+  height: 38px;
+  padding: 0 26px 0 11px;
+  border-radius: 13px;
+  border: 1px solid rgba(255, 255, 255, .95);
+  background-color: rgba(255, 255, 255, .58);
+  box-shadow: var(--shadow-xs);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.select-compact:hover { border-color: #d9e9e3; }
+html[data-theme="dark"] .select-compact {
+  background-color: rgba(255, 255, 255, .045);
+  border-color: rgba(255, 255, 255, .09);
+  color: var(--ink-soft);
+}
+
+.btn-sm {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 13px;
+  font-size: 11.5px;
+}
+.filter-count {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--mint-soft);
+  color: var(--mint-ink);
+  font-family: var(--display);
+  font-size: 9.5px;
+  font-weight: 800;
+}
+html[data-theme="dark"] .filter-count { background: rgba(216, 255, 102, .16); color: var(--mint); }
+
+/* ---------- 2. 顶栏动作区 ---------- */
+.top-actions { display: flex; align-items: center; gap: 8px; justify-self: end; }
+
+.team-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 12px 0 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .95);
+  background: rgba(255, 255, 255, .58);
+  box-shadow: var(--shadow-xs);
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 650;
+  text-decoration: none;
+}
+.team-pill:hover { background: rgba(255, 255, 255, .82); text-decoration: none; }
+.team-avatar { font-size: 12px; }
+html[data-theme="dark"] .team-pill {
+  background: rgba(255, 255, 255, .045);
+  border-color: rgba(255, 255, 255, .09);
+  color: var(--ink-soft);
+}
+
+/* 半透明设置按钮：canvas 透出来，悬停时变实 */
+.settings-btn {
+  background: rgba(255, 255, 255, .42);
+  border-color: rgba(255, 255, 255, .85);
+  opacity: .92;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+.settings-btn:hover { background: rgba(255, 255, 255, .85); opacity: 1; }
+html[data-theme="dark"] .settings-btn {
+  background: rgba(255, 255, 255, .1);
+  border-color: rgba(255, 255, 255, .16);
+}
+html[data-theme="dark"] .settings-btn:hover { background: rgba(216, 255, 102, .14); }
+
+.more-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 60;
+  display: grid;
+  gap: 2px;
+  min-width: 168px;
+  padding: 7px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, .9);
+  background: var(--glass-strong);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  animation: sheet-pop .24s var(--ease-out) both;
+}
+.more-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 11px;
+  border-radius: 11px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.more-item:hover { background: rgba(143, 216, 195, .18); text-decoration: none; }
+.more-item svg { width: 15px; height: 15px; opacity: .8; }
+html[data-theme="dark"] .more-menu {
+  border-color: rgba(255, 255, 255, .1);
+  background: rgba(23, 18, 45, .94);
+}
+html[data-theme="dark"] .more-item:hover { background: rgba(216, 255, 102, .1); }
+
+/* ---------- 3. 设置浮窗 ---------- */
+.settings-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 22px 24px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.settings-head h2 { font-family: var(--display); font-size: 21px; font-weight: 800; letter-spacing: -.02em; }
+.settings-sub { margin-top: 3px; font-size: 11px; color: var(--muted); }
+
+.settings-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--line);
+}
+.settings-tabs .tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .55);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.settings-tabs .tab:hover { background: #fff; color: var(--ink-soft); }
+.settings-tabs .tab[aria-selected="true"] {
+  background: linear-gradient(133deg, #9ee7ca, #b8ddff);
+  color: #1f4a41;
+  border-color: rgba(255, 255, 255, .8);
+  box-shadow: 0 6px 16px rgba(56, 124, 107, .16);
+}
+html[data-theme="dark"] .settings-tabs .tab { background: rgba(255, 255, 255, .045); color: var(--muted); }
+html[data-theme="dark"] .settings-tabs .tab[aria-selected="true"] {
+  background: linear-gradient(133deg, #d8ff66, #a8f7cf);
+  color: #121022;
+}
+
+.settings-body { display: grid; gap: 14px; padding: 18px 24px 24px; }
+.settings-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .72);
+}
+html[data-theme="dark"] .settings-card { background: rgba(255, 255, 255, .035); }
+.settings-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.settings-card-head strong { font-family: var(--display); font-size: 13.5px; font-weight: 800; color: var(--ink-soft); }
+
+.settings-env-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 12px;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+}
+.settings-env-row:first-of-type { border-top: 0; padding-top: 0; }
+.settings-env-meta { display: grid; gap: 2px; min-width: 0; }
+.settings-env-meta code { font-size: 11.5px; font-weight: 700; color: var(--ink-soft); overflow-wrap: anywhere; }
+.settings-env-meta small { font-size: 10px; color: var(--muted); }
+.settings-env-value { display: flex; align-items: center; gap: 8px; }
+.settings-env-value .input { height: 34px; font-size: 11.5px; }
+.settings-source {
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 9.5px;
+  font-weight: 700;
+  background: #f1f7f5;
+  color: #7b918c;
+}
+.settings-source.is-override { background: var(--mint-soft); color: var(--mint-ink); }
+.settings-clear { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; color: var(--muted); white-space: nowrap; }
+.settings-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.settings-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 24px 18px;
+  border-top: 1px solid var(--line);
+}
+html[data-theme="dark"] .settings-source { background: rgba(255, 255, 255, .06); color: var(--muted); }
+html[data-theme="dark"] .settings-source.is-override { background: rgba(216, 255, 102, .14); color: var(--mint); }
+
+.textarea-sm { min-height: 74px; }
+
+/* ---------- 4. 任务详情浮窗 ---------- */
+.task-detail-badges { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-top: 6px; }
+.task-detail-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, .85fr);
+  gap: 20px;
+  padding: 18px 24px 24px;
+}
+.task-detail-main { display: grid; gap: 20px; min-width: 0; }
+.task-detail-side { display: grid; gap: 12px; align-content: start; }
+.detail-kv {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 7px 14px;
+  font-size: 11.5px;
+}
+.detail-kv > span { color: var(--muted); }
+.detail-kv > strong { font-weight: 650; color: var(--ink-soft); overflow-wrap: anywhere; }
+.detail-summary { font-size: 12px; font-weight: 650; color: var(--ink-soft); }
+.detail-content {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .75);
+  border: 1px solid var(--line);
+  font-size: 11.5px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  color: var(--ink-soft);
+}
+.detail-checklist { margin: 8px 0 0; padding-left: 0; list-style: none; display: grid; gap: 4px; font-size: 11.5px; }
+.detail-checklist small { color: var(--muted); }
+.detail-timeline { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+.detail-timeline li { display: flex; align-items: flex-start; gap: 9px; font-size: 11.5px; }
+.detail-timeline strong { display: block; font-weight: 650; color: var(--ink-soft); }
+.detail-timeline small { display: block; margin-top: 1px; color: var(--muted); font-size: 10px; }
+.tone-badge {
+  flex: 0 0 auto;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #f1f7f5;
+  color: #7b918c;
+  font-size: 9.5px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+.tone-badge.is-ok { background: var(--mint-soft); color: var(--mint-ink); }
+.tone-badge.is-warn { background: #fff0eb; color: #c7634e; }
+html[data-theme="dark"] .detail-content { background: rgba(255, 255, 255, .04); border-color: rgba(255, 255, 255, .09); }
+html[data-theme="dark"] .tone-badge { background: rgba(255, 255, 255, .07); color: var(--muted); }
+html[data-theme="dark"] .tone-badge.is-ok { background: rgba(216, 255, 102, .14); color: var(--mint); }
+html[data-theme="dark"] .tone-badge.is-warn { background: rgba(255, 155, 125, .16); color: var(--peach); }
+
+.chip-danger { background: #fff0f2; color: var(--danger); border-color: #ffe4e8; }
+.chip-success { background: var(--mint-soft); color: var(--mint-ink); }
+.project-danger-row { margin-top: 12px; }
+
+/* 任务详情 / 设置浮窗里的旧版面板：沿用旧设计令牌，这里保证深色下依然可读 */
+html[data-theme="dark"] {
+  --color-canvas: #0f0c20;
+  --color-surface: #17122d;
+  --color-surface-muted: #1c1734;
+  --color-surface-sunken: #221c3d;
+  --color-border: rgba(255, 255, 255, .1);
+  --color-border-strong: rgba(255, 255, 255, .18);
+  --color-text: #f7f2ff;
+  --color-text-secondary: #ded5f4;
+  --color-text-muted: #a89dc5;
+  --color-primary: #d8ff66;
+  --color-primary-hover: #c8ef57;
+  --color-primary-soft: rgba(216, 255, 102, .14);
+  --color-primary-border: rgba(216, 255, 102, .3);
+  --color-danger: #ff8296;
+  --color-danger-soft: rgba(255, 130, 150, .14);
+  --color-danger-border: rgba(255, 130, 150, .3);
+  --color-success: #a8f7cf;
+  --color-success-soft: rgba(168, 247, 207, .13);
+  --color-success-border: rgba(168, 247, 207, .3);
+  --color-info: #79e5ff;
+  --color-info-soft: rgba(121, 229, 255, .13);
+  --color-info-border: rgba(121, 229, 255, .3);
+  --color-warning: #ffb86b;
+  --color-warning-soft: rgba(255, 184, 107, .14);
+  --color-warning-border: rgba(255, 184, 107, .3);
+}
+
+/* ---------- 5. 二级页面（旧版组件）深色可读性 ---------- */
+html[data-theme="dark"] .page-title,
+html[data-theme="dark"] .panel-title,
+html[data-theme="dark"] .section-title { color: var(--ink); }
+html[data-theme="dark"] .table th { background: rgba(255, 255, 255, .04); color: var(--muted); }
+html[data-theme="dark"] .table td { border-color: rgba(255, 255, 255, .08); }
+html[data-theme="dark"] .input,
+html[data-theme="dark"] .select,
+html[data-theme="dark"] .textarea {
+  background: rgba(255, 255, 255, .05);
+  color: var(--ink);
+  border-color: rgba(255, 255, 255, .12);
+}
+html[data-theme="dark"] .btn--ghost { color: var(--ink-soft); }
+html[data-theme="dark"] .btn--primary { color: #141022; }
+html[data-theme="dark"] .brand { color: var(--ink); }
+
+/* 二级页面在 demo 外壳里居中留白 */
+.page-wrap > .page,
+main > .page { width: min(1420px, 100%); margin: 0 auto; }
+
+/* ---------- 6. 响应式补丁（五列 + 新浮窗） ---------- */
+@media (max-width: 1180px) {
+  .board { grid-template-columns: repeat(5, minmax(230px, 1fr)); }
+}
+@media (max-width: 960px) {
+  .task-detail-body { grid-template-columns: minmax(0, 1fr); }
+  .settings-env-row { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 720px) {
+  .select-compact { min-width: 0; }
+  .board-tools { width: 100%; }
+  .team-pill { display: none; }
+}
+
+/* 活动流里的「任务 xxxxxxxx ↗」：可点进任务详情，提示这是链接 */
+.badge--link {
+  text-decoration: none;
+  cursor: pointer;
+}
+.badge--link:hover { text-decoration: underline; }
+
+/* ---------- 7. 旧版弹窗要盖在首页浮窗之上 ----------
+   旧设计里 BaseDialog 是 z-index 50，而 demo 的浮窗层是 100：
+   从首页浮窗里再打开确认框（删除项目、移除成员、文档冲突…）时会被浮窗盖住而点不到。
+   层级顺序：页面 0-1 → 顶栏 50 → 首页浮窗 100 → 旧版确认框 200 → 礼花 250 → 提示 300。
+   BaseDialog 的层级写在它的 scoped 样式里（.dialog-backdrop[data-v-…]），
+   选择器权重比这里更高，因此必须用 !important 才能真正抬起来。 */
+.dialog-backdrop {
+  z-index: 200 !important;
+}
+
+/* ---------- 8. 主题只换材质，不换布局 ----------
+   参考的两版 demo 在深色下把顶栏做成了漂浮胶囊、项目卡片改成了横版。
+   主题切换不应该让页面重排，因此这里把深色主题的几何拉回与浅色一致，
+   只保留深色的配色 / 发光 / 玻璃材质差异。 */
+/* 标签胶囊宽度与浅色一致（深色 demo 原本更宽 8px；窄屏仍用 min(250px, 100%)） */
+@media (min-width: 721px) {
+  html[data-theme="dark"] .tab-switch {
+    width: 252px;
+  }
+}
+
+html[data-theme="dark"] .topbar {
+  top: 0;
+  width: 100%;
+  margin: 0;
+  padding: 14px clamp(20px, 3.6vw, 52px) 12px;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .09);
+  border-radius: 0;
+}
+
+@media (min-width: 961px) {
+  html[data-theme="dark"] .project-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  html[data-theme="dark"] .project-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  html[data-theme="dark"] .project-cover {
+    height: 124px;
+    min-height: 0;
+  }
+  html[data-theme="dark"] .project-body {
+    padding: 13px 16px 14px;
+    gap: 8px;
+  }
+  html[data-theme="dark"] .project-title-row h3 {
+    font-size: 18px;
+  }
+  html[data-theme="dark"] .project-tagline {
+    min-height: 39px;
+    font-size: 12.5px;
+    -webkit-line-clamp: 2;
+  }
+  html[data-theme="dark"] .cover-emoji {
+    right: 24px;
+    bottom: 11px;
+    font-size: 54px;
+  }
+  html[data-theme="dark"] .project-cover::after {
+    right: 18px;
+    top: 22px;
+    width: 64px;
+    height: 64px;
+  }
+  html[data-theme="dark"] .project-cover .status-pill {
+    top: 13px;
+    left: 14px;
+  }
+  html[data-theme="dark"] .new-project-tile {
+    min-height: 252px;
+  }
+}
+
+/* ---------- 9. 旧版控件（二级页面/复用面板）对齐新设计系统 ----------
+   旧样式表先加载、demo 后加载：同名单类名会被 demo 的 `.btn` 覆盖，
+   结果 `.btn--primary` 变成透明按钮、`.btn--danger` 丢掉危险色。
+   这里用双类名把旧修饰符映射回 demo 的外观。 */
+.btn.btn--primary {
+  color: #fff;
+  background: linear-gradient(135deg, #35a284 0%, #227d66 100%);
+  border-color: transparent;
+  box-shadow: 0 10px 22px rgba(37, 133, 107, .24), inset 0 1px 0 rgba(255, 255, 255, .22);
+}
+.btn.btn--primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #3cae8f 0%, #268770 100%);
+  box-shadow: 0 14px 28px rgba(37, 133, 107, .28), inset 0 1px 0 rgba(255, 255, 255, .25);
+}
+html[data-theme="dark"] .btn.btn--primary {
+  color: #131022;
+  background: linear-gradient(133deg, #d8ff66 0%, #9cf6bc 48%, #79e5ff 100%);
+  box-shadow: 0 10px 26px rgba(174, 255, 108, .17), inset 0 1px 0 rgba(255, 255, 255, .63);
+}
+
+.btn.btn--danger {
+  color: var(--danger);
+  background: #fff2f4;
+  border-color: #ffe4e8;
+}
+.btn.btn--danger:hover:not(:disabled) { background: #ffeaee; border-color: #ffd6dd; }
+html[data-theme="dark"] .btn.btn--danger {
+  background: rgba(255, 130, 150, .1);
+  border-color: rgba(255, 130, 150, .22);
+  color: #ff9dae;
+}
+html[data-theme="dark"] .btn.btn--danger:hover:not(:disabled) { background: rgba(255, 130, 150, .16); }
+
+.btn.btn--ghost {
+  background: #f1f8f5;
+  border-color: #e8f2ef;
+  color: #506a66;
+}
+.btn.btn--ghost:hover:not(:disabled) { background: #e9f5f0; }
+html[data-theme="dark"] .btn.btn--ghost {
+  background: rgba(255, 255, 255, .055);
+  border-color: rgba(255, 255, 255, .1);
+  color: #cfc5e4;
+}
+html[data-theme="dark"] .btn.btn--ghost:hover:not(:disabled) { background: rgba(255, 255, 255, .09); }
+
+.btn.btn--sm { height: 32px; padding: 0 12px; border-radius: 11px; font-size: 11px; }
+.btn.btn--xs { height: 27px; padding: 0 9px; border-radius: 9px; font-size: 10.5px; }
+.btn.btn--block { width: 100%; }
+
+/* 旧版语义色令牌对齐 demo 调色板（浅色；深色在上一段已对齐）。
+   这些令牌喂给二级页面的徽标 / 提示条 / 表格 / 页签，避免蓝紫配薄荷的割裂感。 */
+html[data-theme="light"], :root {
+  --color-canvas: #f2fbf6;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fdfb;
+  --color-surface-sunken: #eef7f3;
+  --color-border: #e5efec;
+  --color-border-strong: #d5e7e1;
+  --color-text: #223b3d;
+  --color-text-secondary: #3c5557;
+  --color-text-muted: #778b8d;
+  --color-primary: #24856b;
+  --color-primary-hover: #1f6c58;
+  --color-primary-active: #195a4a;
+  --color-primary-soft: #dcf8ec;
+  --color-primary-border: #b9e5d7;
+  --color-danger: #c54f62;
+  --color-danger-soft: #fff2f4;
+  --color-danger-border: #ffd6dd;
+  --color-success: #328069;
+  --color-success-soft: #e5f8ef;
+  --color-success-border: #bce8d9;
+  --color-info: #3875a4;
+  --color-info-soft: #e6f3ff;
+  --color-info-border: #c8e2f7;
+  --color-warning: #977129;
+  --color-warning-soft: #fff6dd;
+  --color-warning-border: #ffe9b3;
+}
+
+/* ---------- 10. 交互态样式补齐（原先只有 aria 状态，没有视觉反馈） ---------- */
+/* 封面配色 / emoji 选择器：选中时描一圈薄荷色边 + 右上角对勾 */
+.cover-swatch.is-active,
+.emoji-option.is-active {
+  border-color: var(--mint-deep);
+  box-shadow: 0 0 0 3px rgba(158, 231, 202, .35);
+  transform: translateY(-1px);
+}
+html[data-theme="dark"] .cover-swatch.is-active,
+html[data-theme="dark"] .emoji-option.is-active {
+  border-color: var(--mint);
+  box-shadow: 0 0 0 3px rgba(216, 255, 102, .22);
+}
+
+/* 已删除的项目卡片整体降饱和 + 虚线边，和“进行中”的项目一眼区分 */
+.project-card.is-deleted {
+  opacity: .72;
+  border-style: dashed;
+  filter: saturate(.6);
+}
+.project-card.is-deleted:hover { opacity: .88; }
+
+/* 旧版表格的选中行（Agent 列表） */
+.table tbody tr.is-selected {
+  background: var(--color-primary-soft);
+}
+
+/* 整宽按钮（与旧版 .btn--block 对齐） */
+.btn-block { width: 100%; }
+
+/* ---------- 11. 字号放大（整体 +18%~20%，更易读） ----------
+   参考的两版 demo 偏“小字精致”：正文 14px、卡片标题 12.7px、标签 9.5px。
+   在真实看板（100+ 卡片、大屏）上看偏费劲，这里统一放大一档；
+   只改字号与少数需要跟着长高的胶囊高度，不改布局结构。 */
+body { font-size: 16px; }
+.brand-name { font-size: 20px; }
+.brand-sub { font-size: 11.5px; }
+.tab { font-size: 14.5px; }
+.tab-count { font-size: 11.5px; }
+.eyebrow { font-size: 12.5px; }
+.view-head h1 { font-size: clamp(32px, 3vw, 44px); }
+.view-head-copy > p { font-size: 14px; }
+.btn { font-size: 14px; }
+.btn-lg { font-size: 14.5px; }
+.donut-pct { font-size: 12px; }
+.progress-copy strong { font-size: 14px; }
+.progress-copy span { font-size: 12px; }
+.board-ident strong { font-size: 15px; }
+.board-ident small { font-size: 12px; }
+.search input { font-size: 13.5px; }
+.col-name h2 { font-size: 14.5px; }
+.col-name span { font-size: 11px; }
+.tag { font-size: 11px; height: 23px; }
+.tag .tag-emoji { font-size: 11.5px; }
+.priority { font-size: 10.5px; height: 22px; }
+.task-card h3 { font-size: 14.5px; }
+.task-desc { font-size: 12.5px; }
+.meta-item { font-size: 11px; }
+.mini-count { font-size: 12px; }
+.mini-count strong { font-size: 15px; }
+.chip { font-size: 12.5px; }
+.chip .chip-count { font-size: 11px; }
+.project-title-row h3 { font-size: 18px; }
+.project-tagline { font-size: 12.5px; min-height: 39px; }
+.project-progress b { font-size: 11.5px; }
+.project-meta { font-size: 11px; }
+.status-pill { font-size: 11px; height: 27px; }
+.project-cover .status-pill { height: 27px; }
+.block-title { font-size: 13px; }
+.block-title .block-num { font-size: 10.5px; }
+.background-text { font-size: 13.5px; }
+.doc-info strong { font-size: 12.5px; }
+.doc-info small { font-size: 10.5px; }
+.doc-edit-row .doc-info strong { font-size: 12px; }
+.doc-edit-row .doc-info small { font-size: 10px; }
+.side-label { font-size: 10.5px; }
+.side-progress strong { font-size: 22px; }
+.side-progress span { font-size: 11px; }
+.side-date strong { font-size: 13px; }
+.side-date span { font-size: 11px; }
+.modal-overline { font-size: 10px; }
+.field > label, .field > .field-label { font-size: 12px; }
+.field-hint { font-size: 10.5px; }
+.input, .select, .textarea { font-size: 14px; }
+.task-form-head h2 { font-size: 22px; }
+.banner-copy h2 { font-size: clamp(28px, 3.2vw, 38px); }
+html[data-theme="dark"] .banner-copy h2 { font-size: clamp(28px, 3.2vw, 38px); }
+.banner-copy p { font-size: 13px; }
+.banner-overline { font-size: 10px; }
+.empty-col { font-size: 11.5px; }
+.quick-add { font-size: 11.5px; }
+.new-project-tile { font-size: 13.5px; }
+.new-project-tile small { font-size: 11px; }
+.empty-projects h3 { font-size: 19px; }
+.empty-projects p { font-size: 13px; }
+.doc-empty { font-size: 11.5px; }
+.cover-preview strong { font-size: 13px; }
+.cover-preview span { font-size: 9.5px; }
+.upload-zone strong { font-size: 12px; }
+.upload-zone small { font-size: 10px; }
+.form-note span { font-size: 12.5px; }
+.modal-task-note { font-size: 10.5px; }
+#toast { font-size: 13px; }
+.team-label { font-size: 12px; }
+.people-filter .p-filter.all { font-size: 11.5px; }
+.project-footer .btn, .form-footer .btn, .task-form-footer .btn { font-size: 13.5px; }
+
+/* 首页新增组件里的字号 */
+.task-number { font-size: 11px; }
+.select-compact { font-size: 13px; }
+.filter-count { font-size: 10.5px; }
+.more-item { font-size: 13.5px; }
+.team-pill { font-size: 12.5px; }
+.board-state strong { font-size: 16.5px; }
+.settings-head h2 { font-size: 23px; }
+.settings-sub { font-size: 12.5px; }
+.settings-tabs .tab { font-size: 13.5px; }
+.settings-card-head strong { font-size: 15px; }
+.settings-env-meta code { font-size: 13px; }
+.settings-env-meta small { font-size: 11.5px; }
+.settings-env-value .input { font-size: 13px; }
+.settings-source { font-size: 10.5px; }
+.settings-clear { font-size: 11.5px; }
+.detail-kv { font-size: 13px; }
+.detail-summary { font-size: 13.5px; }
+.detail-content { font-size: 13px; }
+.detail-checklist { font-size: 12.5px; }
+.detail-timeline li { font-size: 12.5px; }
+.detail-timeline small { font-size: 11px; }
+.tone-badge { font-size: 10.5px; }
+
+/* 窄屏标题继续按视口收缩，但起步仍比原来大一档 */
+@media (max-width: 1180px) {
+  .view-head h1 { font-size: clamp(29px, 3.2vw, 38px); }
+}
+@media (max-width: 720px) {
+  .view-head h1 { font-size: clamp(26px, 6.4vw, 34px); }
+}
+
+/* 二级页面（旧设计系统）的字号令牌同步上调 */
+:root {
+  --text-xs: 0.8125rem;   /* 13px */
+  --text-sm: 0.875rem;    /* 14px */
+  --text-base: 0.9375rem; /* 15px */
+  --text-md: 1rem;        /* 16px */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.375rem;    /* 22px */
+  --text-2xl: 1.625rem;   /* 26px */
+}
+
+/* ---------- 12. 按钮 / 页签 hover 统一 ----------
+   旧版 components.css 里的 `.btn:hover:not(:disabled)` 权重是 (0,3,0)，
+   高于 demo 的 `.btn-primary:hover` (0,2,0)，会把主按钮悬停背景刷成浅灰
+   （文字仍是白色 → 看不清）。下面用同等权重覆盖，hover 只做“同色系更亮”，不再变浅底。 */
+
+/* 主按钮：保持绿色渐变（深色主题为霓虹渐变），不再被浅灰覆盖 */
+.btn-primary:hover:not(:disabled) {
+  color: #fff;
+  background: linear-gradient(135deg, #3cae8f 0%, #268770 100%);
+  border-color: transparent;
+  box-shadow: 0 14px 28px rgba(37, 133, 107, .28), inset 0 1px 0 rgba(255, 255, 255, .25);
+}
+html[data-theme="dark"] .btn-primary:hover:not(:disabled) {
+  color: #0d0b18;
+  background: linear-gradient(133deg, #e2ff85 0%, #acffca 48%, #8deaff 100%);
+  border-color: transparent;
+  box-shadow: 0 14px 34px rgba(174, 255, 108, .24), inset 0 1px 0 rgba(255, 255, 255, .7);
+}
+
+/* 危险按钮：保持红底红字 */
+.btn-danger:hover:not(:disabled) {
+  background: #ffeaee;
+  border-color: #ffd6dd;
+  color: var(--danger);
+}
+html[data-theme="dark"] .btn-danger:hover:not(:disabled) {
+  background: rgba(255, 130, 150, .16);
+  border-color: rgba(255, 130, 150, .3);
+  color: #ff9dae;
+}
+
+/* 次按钮 / 幽灵按钮：浅底只提亮一档 */
+.btn-ghost:hover:not(:disabled) {
+  background: #e9f5f0;
+  border-color: #e8f2ef;
+}
+html[data-theme="dark"] .btn-ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, .09);
+  border-color: rgba(255, 255, 255, .1);
+}
+.btn-soft:hover:not(:disabled) {
+  background: #fdfffe;
+  border-color: #cee5de;
+}
+html[data-theme="dark"] .btn-soft:hover:not(:disabled) {
+  background: rgba(216, 255, 102, .08);
+  border-color: rgba(216, 255, 102, .3);
+}
+
+/* 二级页面还在用旧版修饰符（.btn--primary 等）：hover 同样按语义色走 */
+.btn.btn--primary:hover:not(:disabled) {
+  color: #fff;
+  background: linear-gradient(135deg, #3cae8f 0%, #268770 100%);
+  border-color: transparent;
+}
+html[data-theme="dark"] .btn.btn--primary:hover:not(:disabled) {
+  color: #131022;
+  background: linear-gradient(133deg, #e2ff85 0%, #acffca 48%, #8deaff 100%);
+  border-color: transparent;
+}
+.btn.btn--danger:hover:not(:disabled) {
+  background: #ffeaee;
+  border-color: #ffd6dd;
+  color: var(--danger);
+}
+html[data-theme="dark"] .btn.btn--danger:hover:not(:disabled) {
+  background: rgba(255, 130, 150, .16);
+  border-color: rgba(255, 130, 150, .3);
+  color: #ff9dae;
+}
+.btn.btn--ghost:hover:not(:disabled) {
+  background: #e9f5f0;
+  border-color: #e8f2ef;
+  color: #506a66;
+}
+html[data-theme="dark"] .btn.btn--ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, .09);
+  border-color: rgba(255, 255, 255, .1);
+  color: #cfc5e4;
+}
+
+/* 禁止点击时不再给 hover 反馈 */
+.btn:disabled { cursor: not-allowed; }
+
+/* 顶栏胶囊标签：hover 只变文字色（旧版 .tab:hover 会加一块灰底） */
+.tab-switch .tab:hover {
+  background: transparent;
+  color: #355b54;
+}
+html[data-theme="dark"] .tab-switch .tab:hover {
+  background: transparent;
+  color: #d8cee9;
+}
+
+/* ---------- 13. 访问密钥登录页 ---------- */
+.auth-boot {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.auth-boot-card {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 26px 34px;
+  border-radius: 22px;
+  border: 1px solid var(--glass-strong);
+  background: var(--glass-strong);
+  box-shadow: var(--shadow-md);
+  color: var(--muted);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+}
+
+.auth-boot-card strong {
+  font-family: var(--display);
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+
+.auth-boot-card .state-face { font-size: 30px; }
+
+/* ---------- 14. 截图/可读性细节 ---------- */
+/* 品牌副标题保留原样大小写（demo 的 uppercase 会把 Harness 变成 HARNESS） */
+.brand-sub {
+  text-transform: none;
+  letter-spacing: .06em;
+}
+
+/* 项目浮窗里的旧版文档表列多、内容长：不换行 + 横向滚动，避免每格被挤成竖排 */
+.project-sheet .doc-table { min-width: 640px; }
+.project-sheet .doc-table th,
+.project-sheet .doc-table td { white-space: nowrap; }
+.project-sheet .doc-table td:last-child { white-space: normal; }

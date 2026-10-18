@@ -1,0 +1,124 @@
+/**
+ * 设计令牌（Design Tokens）。
+ *
+ * 所有页面共用同一套颜色、间距、圆角、阴影与字号；页面组件只引用变量，
+ * 不写死色值，保证「同一语义 → 同一视觉」。
+ */
+
+:root {
+  color-scheme: light;
+
+  /* 字体 */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-md: 0.9375rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* 间距 */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+
+  /* 圆角 */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+
+  /* 中性色 */
+  --color-canvas: #f4f5f7;
+  --color-surface: #ffffff;
+  --color-surface-muted: #fafbfc;
+  --color-surface-sunken: #eff1f4;
+  --color-border: #e3e6ea;
+  --color-border-strong: #cfd4db;
+  --color-text: #14181f;
+  --color-text-secondary: #4a5361;
+  --color-text-muted: #6b7684;
+  --color-text-inverse: #ffffff;
+
+  /* 品牌色 */
+  --color-primary: #3d5afe;
+  --color-primary-hover: #2f49e0;
+  --color-primary-active: #2740c4;
+  --color-primary-soft: #eef1ff;
+  --color-primary-border: #c3ccff;
+
+  /* 语义色 */
+  --color-success: #067647;
+  --color-success-soft: #ecfdf3;
+  --color-success-border: #a6f4c5;
+  --color-warning: #b54708;
+  --color-warning-soft: #fffaeb;
+  --color-warning-border: #fedf89;
+  --color-danger: #b42318;
+  --color-danger-soft: #fef3f2;
+  --color-danger-border: #fecdca;
+  --color-info: #175cd3;
+  --color-info-soft: #eff8ff;
+  --color-info-border: #b2ddff;
+
+  /* 五态配色（文字同显，不单靠颜色表达） */
+  --status-preparing: #5b6472;
+  --status-preparing-soft: #f1f3f6;
+  --status-preparing-border: #d8dde5;
+  --status-todo: #175cd3;
+  --status-todo-soft: #eff6ff;
+  --status-todo-border: #bcd7fb;
+  --status-in-progress: #b54708;
+  --status-in-progress-soft: #fff7e8;
+  --status-in-progress-border: #fbdba7;
+  --status-in-review: #6941c6;
+  --status-in-review-soft: #f6f2ff;
+  --status-in-review-border: #d9d0f7;
+  --status-done: #067647;
+  --status-done-soft: #ecfdf3;
+  --status-done-border: #a8e6c0;
+
+  /* 侧边栏（深色导航，突出内容区层级） */
+  --nav-bg: #101728;
+  --nav-bg-hover: #1c2740;
+  --nav-bg-active: #253352;
+  --nav-text: #b9c2d4;
+  --nav-text-active: #ffffff;
+  --nav-border: #232f47;
+  --nav-section: #6b7793;
+
+  /* 阴影 */
+  --shadow-xs: 0 1px 2px rgb(16 24 40 / 6%);
+  --shadow-sm: 0 1px 3px rgb(16 24 40 / 8%), 0 1px 2px rgb(16 24 40 / 4%);
+  --shadow-md: 0 4px 10px rgb(16 24 40 / 8%), 0 2px 4px rgb(16 24 40 / 4%);
+  --shadow-lg: 0 16px 32px rgb(16 24 40 / 14%), 0 4px 8px rgb(16 24 40 / 6%);
+  --shadow-drag: 0 18px 36px rgb(16 24 40 / 22%);
+
+  /* 布局 */
+  --nav-width: 232px;
+  --topbar-height: 60px;
+  --content-max: 1600px;
+
+  /* 动效 */
+  --transition-fast: 120ms ease;
+  --transition-base: 180ms ease;
+}
